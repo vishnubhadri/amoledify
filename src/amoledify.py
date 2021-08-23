@@ -3,7 +3,7 @@
 import sys, getopt, re, time
 from PIL import Image
 
-
+VERSION="0.0.1"
 inputfile = ""
 outputfile = "output.jpg"
 toleranceLevel = 32
@@ -36,16 +36,20 @@ def main(argv):
     global outputfile
     global toleranceLevel
     global colors
+    global VERSION
     try:
-        opts, args = getopt.getopt(argv, "hi:o:t:c:", ["ifile=", "ofile=", "t", "c"])
+        opts, args = getopt.getopt(argv, "vhi:o:t:c:", ["ifile=", "ofile=", "t", "c"])
     except getopt.GetoptError:
         print(
-            "amoledify.py -i <path/to/inputfile> -o <path/to/outputfile> [-t <toleranceLevel> / -c <(00,00,00),(11,11,11),...> (in rgb)"
+            "amoledify.py -i <path/to/inputfile> -o <path/to/outputfile> [-t <toleranceLevel> / -c <(00,00,00),(11,11,11),...> (in rgb 0-255)"
         )
         sys.exit(2)
     for opt, arg in opts:
-        if opt == "-h":
-            print("test.py -i <path/to/inputfile> -o <path/to/outputfile>")
+        if opt == "-v":
+            print(VERSION)
+            sys.exit()
+        elif opt == "-h":
+            print("amoledify.py -i <path/to/inputfile> -o <path/to/outputfile> [-t <toleranceLevel> / -c <(00,00,00),(11,11,11),...> (in rgb 0-255)")
             sys.exit()
         elif opt in ("-i", "--ifile"):
             inputfile = arg
@@ -59,7 +63,7 @@ def main(argv):
                 toleranceLevel = int(arg)
         elif opt in ("-c", "--color"):
             colors.clear()
-            for tup in re.findall("\([,\d]*\)", arg):
+            for tup in re.findall(r"\([,\d]*\)", arg):
                 r, g, b = 0, 0, 0
                 r, g, b = tup[1:-1].split(",")
                 colors.append(tuple([int(r), int(g), int(b)]))
@@ -84,7 +88,6 @@ def reduceHexValue(color, value, condition):
 
 def computeTolerance(color):
     r, g, b = color
-    _toleranceValue = []
     for value in range(0, toleranceLevel):
         least = (
             reduceHexValue(r, value, "p"),
